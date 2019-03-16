@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "558354820319",
+    "firebase_url": "https://seguridad-comunitaria-93bd2.firebaseio.com",
+    "project_id": "seguridad-comunitaria-93bd2",
+    "storage_bucket": "seguridad-comunitaria-93bd2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558354820319:android:ffa89dcb481e04a7",
+        "android_client_info": {
+          "package_name": "com.ciudadanosinvolucrados.seguridadcomunitaria"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "558354820319-fivov5lj6k2c5k3046163clb9799732e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3OpwVNHHttRbTAtd1HZky8DZxNPAIy_k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
