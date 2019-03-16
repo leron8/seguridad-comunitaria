@@ -29,9 +29,18 @@ const AuthStack = createStackNavigator(
         LoginRegister: LoginRegister,
     },
     {
-        mode: 'modal',
-        headerMode: 'none',
-    }
+        initialRouteName: 'LoginRegister',
+        navigationOptions: {
+          headerStyle: {
+            backgroundColor: '#03a9f4',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+          headerBackTitle: 'Atrás',
+        },
+      }
 );
 
 const RootStack = createSwitchNavigator(
