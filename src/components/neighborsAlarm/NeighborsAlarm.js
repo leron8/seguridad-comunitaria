@@ -125,6 +125,9 @@ class NeighborsAlarm extends Component {
           console.log(fcmToken)
           if (fcmToken) {
             // user has a device token
+            this.userRef.update({
+                fcmToken: fcmToken,
+            });
             
           } else {
             // user doesn't have a device token yet
@@ -133,6 +136,27 @@ class NeighborsAlarm extends Component {
         this.messageListener = firebase.messaging().onMessage((message) => {
           // Process your message as required
           console.log(message,"YES");
+
+          const text = message.data.message;
+            const payload = message.data;
+            const localNotification = new firebase.notifications.Notification({
+                show_in_foreground: true
+            })
+            .android.setChannelId('alarm-channel')
+            .android.setPriority(firebase.notifications.Android.Priority.High)
+            .setNotificationId(message.messageId)
+            .setTitle('ALARMA')
+            //.setSubtitle(`Unread message: ${payload.unread_message_count}`)
+            .setBody(text)
+            .setData(payload)
+            .setSound('alert_appear.wav')
+            ;
+        
+            //const action = new firebase.notifications.Android.Action('Reply', 'ic_launcher', 'My Test Action');
+            // Add the action to the notification
+            //localNotification.android.addAction(action);
+        
+            firebase.notifications().displayNotification(localNotification);
         });
         this.notificationDisplayedListener = firebase.notifications().onNotificationDisplayed((notification) => {
             // Process your notification as required
@@ -164,6 +188,9 @@ class NeighborsAlarm extends Component {
           this.onTokenRefreshListener = firebase.messaging().onTokenRefresh(fcmToken => {
               // Process your token as required
               console.log(fcmToken);
+              this.userRef.update({
+                fcmToken: fcmToken,
+            });
         });
     }
     
