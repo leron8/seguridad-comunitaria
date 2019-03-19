@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, ScrollView } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-//const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } }};
-//const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } }};
 import firebase from 'react-native-firebase';
 
 class RegisterLogin extends Component {
@@ -129,12 +127,30 @@ class RegisterLogin extends Component {
                     }}
 
                     filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
-                    //predefinedPlaces={[homePlace, workPlace]}
 
                     debounce={200} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
                     //renderLeftButton={()  => <Image source={require('path/custom/left-icon')} />}
                     //renderRightButton={() => <Text>Custom text after the input</Text>}
                     />
+
+                    <Text>
+                        Calle: { this.state.selectedRoute }
+                    </Text>
+                    <Text>
+                        Colonia: { this.state.selectedSublocality }
+                    </Text>
+                    <Text>
+                        Código Postal: { this.state.selectedPostalCode }
+                    </Text>
+                    <Text>
+                        Ciudad: { this.state.selectedCity }
+                    </Text>
+                    <Text>
+                        Estado: { this.state.selectedState }
+                    </Text>
+                    <Text>
+                        País: { this.state.selectedCountry }
+                    </Text>
                     
             </ScrollView>
         );
