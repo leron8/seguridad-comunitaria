@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import firebase from 'react-native-firebase';
+import Sound from 'react-native-sound'
 
 class NeighborsAlarm extends Component {
 
@@ -16,15 +17,24 @@ class NeighborsAlarm extends Component {
             alerted: false,
         };
         this.toggleAlert = this.toggleAlert.bind(this);
-        
+        this.alarmSound = new Sound('alert_appear.wav', Sound.MAIN_BUNDLE, (error) => {
+            if (error) {
+              console.error('failed to load the sound', error);
+              return;
+            }else{
+              this.alarmSound.setVolume(1.0);
+              this.alarmSound.setNumberOfLoops(-1);
+            }
+          });
     }
 
     componentDidMount(){
+        // Enable playback in silence mode
+        Sound.setCategory('Playback');
+
         this.authSubscriber = firebase.auth().onAuthStateChanged((authUser) => {
-            console.log(authUser);
             
             if(authUser){
-                console.log(authUser);
                 this.uid = authUser._user.uid;
                 this.userRef = firebase.firestore().collection('users').doc(this.uid);
                 this.userAlarmsRef = this.userRef.collection('alarms');
@@ -33,34 +43,26 @@ class NeighborsAlarm extends Component {
                 this.alarmsRef = [];
 
                 this.userAlarmsRef.get().then((alarmsResponse)=>{
-                    console.log(alarmsResponse);
                     
                     alarmsResponse.forEach((alarmsData)=>{
-                        console.log(alarmsData);
                         
                         this.alarmsRef.push(
                             alarmsData.data().alarmRef
                         );
                     });
-
-                    console.log(this.alarmsRef);
                     
                     //One alarm for now
                     this.alarmSubscriber = this.mainAlarmRef.doc(this.alarmsRef[0]).onSnapshot((alarmSnap)=>{
-                        console.log(alarmSnap);
                         
                         if(alarmSnap.exists){
-                            console.log(alarmSnap);
                             let alarmData = alarmSnap.data();
 
-                            console.log(alarmData);
-
                             if(alarmData.alerted){
-                                /*this.cardFlipSound.play((success) => {
+                                this.alarmSound.play((success) => {
                                     if (!success) {
                                         console.error('playback failed due to audio decoding errors');
                                     }
-                                });*/
+                                });
                             }
 
                             this.setState({
@@ -84,24 +86,18 @@ class NeighborsAlarm extends Component {
         if(this.alarmSubscriber){
             this.alarmSubscriber();
         }
+        this.alarmSound.release();
     }
     
     toggleAlert(){
         if(!this.state.alerted){
-            /*this.cardFlipSound.play((success) => {
+            this.alarmSound.play((success) => {
               if (!success) {
                   console.error('playback failed due to audio decoding errors');
               }
-            });*/
+            });
         }else{
-            console.log('pause');
-            
-            //this.cardFlipSound.pause();
-            /*this.cardFlipSound.stop(() => {
-              // Note: If you want to play a sound after stopping and rewinding it,
-              // it is important to call play() in a callback.
-              this.cardFlipSound.play();
-            });*/
+            this.alarmSound.pause();
         }
         this.mainAlarmRef.doc(this.alarmsRef[0]).update({
             alerted: !this.state.alerted,
