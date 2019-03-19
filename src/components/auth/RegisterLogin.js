@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, ScrollView } from 'react-native';
+import { StyleSheet, Text, ScrollView, Button, ActivityIndicator } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import firebase from 'react-native-firebase';
 
@@ -18,16 +18,36 @@ class RegisterLogin extends Component {
             selectedCity: '',
             selectedState: '',
             selectedCountry: '',
+            alarmId: '',
+            loading: false,
         };
 
         this.generateId = this.generateId.bind(this);
+        this.addAlarm = this.addAlarm.bind(this);
+        this.processAddress = this.processAddress.bind(this);
+        this.addAlarmToUser = this.addAlarmToUser.bind(this);
+        this.createUserData = this.createUserData.bind(this);
+        this.logUserIn = this.logUserIn.bind(this);
+
+        this.alarmsRef = firebase.firestore().collection('alarms');
+        this.usersRef = firebase.firestore().collection('users');
     }
 
     generateId(){
-        //
-        firebase.auth().signInAnonymously()
-        .then(() => {
-            console.log('logged in')
+        let fieldsForId;
+        fieldsForId = this.state.selectedPostalCode + this.state.selectedSublocality + 
+            this.state.selectedRoute;
+        
+        let hash = 0, i, chr;
+        if (fieldsForId.length === 0) return hash;
+        for (i = 0; i < fieldsForId.length; i++) {
+            chr   = fieldsForId.charCodeAt(i);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+
+        this.setState({
+            alarmId: ''+hash,
         });
     }
 
@@ -60,7 +80,7 @@ class RegisterLogin extends Component {
                 }
             });
         });
-        console.log(route, sublocality, postalCode, city, state, country);
+        
         this.setState({
             selectedRoute: route,
             selectedSublocality: sublocality,
@@ -68,6 +88,104 @@ class RegisterLogin extends Component {
             selectedCity: city,
             selectedState: state,
             selectedCountry: country,
+        },()=>{
+            this.generateId()
+        });
+    }
+
+    addAlarm(){
+        this.setState({
+            loading: true,
+        },()=>{
+            this.createUserData().then((uid)=>{
+                this.alarmsRef.doc(this.state.alarmId).get().then((doc)=>{
+                    console.log(doc)
+                    if (doc.exists){
+                        console.log('exists');
+                        this.addAlarmToUser(uid).then(()=>{
+                            alert('Alarma agregada');
+                            this.props.navigation.navigate('App');
+                        }).catch((err)=>{
+                            alert('Error, favor de contactarnos')
+                        });
+                    }else{
+                        this.alarmsRef.doc(this.state.alarmId).set({
+                            alerted: false,
+                            id: this.state.alarmId,
+                            route: this.state.selectedRoute,
+                            sublocality: this.state.selectedSublocality,
+                            postalCode: this.state.selectedPostalCode,
+                            city: this.state.selectedCity,
+                            state: this.state.selectedState,
+                            country: this.state.selectedCountry,
+                        }).then(()=>{
+                            console.log('didnt exist')
+                            this.addAlarmToUser(uid).then(()=>{
+                                alert('Alarma agregada');
+                                this.props.navigation.navigate('App');
+                            }).catch((err)=>{
+                                alert('Error, favor de contactarnos')
+                            });
+                        }).catch((err)=>{
+                            console.error(err);
+                        });
+                    }
+                }).catch((err)=>{
+                    console.error(err);
+                });
+            }).catch((err)=>{
+                console.error(err);
+            });
+        });
+    }
+
+    addAlarmToUser(uid){
+        return new Promise((resolve, reject)=>{
+            this.usersRef.doc(uid).collection('alarms').add({
+                alarmRef: this.state.alarmId
+            }).then(()=>{
+                resolve();
+            }).catch((err)=>{
+                console.error(err)
+                reject(err);
+            });
+        });
+    }
+
+    createUserData(){
+        return new Promise((resolve, reject)=>{
+            this.logUserIn().then((userInfo)=>{
+                let uid = userInfo.user.uid;
+                this.usersRef.doc(uid).get().then((userData)=>{
+                    if(!userData.exists){
+                        this.usersRef.doc(uid).set({
+                            uid: uid,
+                        }).then(()=>{
+                            resolve(uid);
+                        }).catch((err)=>{
+                            console.error(err)
+                            reject(err);
+                        });
+                    }
+                });
+            }).catch((err)=>{
+                console.error(err);
+                reject(err);
+            });
+        });
+    }
+
+    logUserIn(){
+        return new Promise((resolve, reject)=>{
+            firebase.auth().signInAnonymously()
+            .then((userInfo) => {
+                console.log('logged in', userInfo.user.uid);
+                resolve(userInfo);
+            },()=>{
+                console.error('LoginRejected')
+            }).catch((err)=>{
+                reject(err);
+            });
         });
     }
 
@@ -151,6 +269,18 @@ class RegisterLogin extends Component {
                     <Text>
                         País: { this.state.selectedCountry }
                     </Text>
+
+                    {
+                        this.state.loading && 
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    }
+
+                    <Button
+                        onPress={this.addAlarm}
+                        title="Agregar alarma para esta zona"
+                        color="#841584"
+                        disabled={!this.state.alarmId || this.state.loading}
+                    />
                     
             </ScrollView>
         );

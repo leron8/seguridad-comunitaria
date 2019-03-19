@@ -7,7 +7,7 @@ export default class AuthLoadingScreen extends React.Component {
     super(props);
     this.authSubscriber = null;
     this.state = {
-      authUser: null,
+      
     };
   }
 
@@ -17,7 +17,6 @@ export default class AuthLoadingScreen extends React.Component {
             this.props.navigation.navigate('App');
         }else{
             this.props.navigation.navigate('Auth');
-            
         }
     });
   }
