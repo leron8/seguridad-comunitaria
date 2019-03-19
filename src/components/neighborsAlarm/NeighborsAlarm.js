@@ -15,7 +15,7 @@ class NeighborsAlarm extends Component {
             authUser: {},
             alerted: false,
         };
-        this.alert = this.alert.bind(this);
+        this.toggleAlert = this.toggleAlert.bind(this);
         
     }
 
@@ -86,8 +86,26 @@ class NeighborsAlarm extends Component {
         }
     }
     
-    alert(){
-
+    toggleAlert(){
+        if(!this.state.alerted){
+            /*this.cardFlipSound.play((success) => {
+              if (!success) {
+                  console.error('playback failed due to audio decoding errors');
+              }
+            });*/
+        }else{
+            console.log('pause');
+            
+            //this.cardFlipSound.pause();
+            /*this.cardFlipSound.stop(() => {
+              // Note: If you want to play a sound after stopping and rewinding it,
+              // it is important to call play() in a callback.
+              this.cardFlipSound.play();
+            });*/
+        }
+        this.mainAlarmRef.doc(this.alarmsRef[0]).update({
+            alerted: !this.state.alerted,
+        });
     }
 
     render() {
@@ -97,7 +115,7 @@ class NeighborsAlarm extends Component {
                     {this.state.alerted ? 'alerta' : 'reposo'}
                 </Text>
                 <Button
-                    onPress={this.alert}
+                    onPress={this.toggleAlert}
                     title="ALERTAR"
                     color="#841584"
                 />
